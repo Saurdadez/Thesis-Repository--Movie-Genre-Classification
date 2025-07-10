@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Genre Classifier</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    
+    <header>
+        <div class="logo-title">
+            <img src="{{ url_for('static', filename='LOGO.png') }}" alt="Logo" class="logo">
+        <h1>Music Genre Classifier</h1>
+        </div>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('about') }}">About Us</a>
+            <a href="{{ url_for('howtouse') }}">How to Use</a>
+        </nav>
+    </header>
+    <section class="about-section">
+        
+        <p class="about-text">
+            The Movie Genre Classification System is an model designed to classify movie genres using background music. Traditional classification methods rely on visual or textual data, often overlooking the impact of soundtracks in defining a film’s tone and atmosphere. To address this gap, the system employs Mel-spectrogram analysis to extract essential audio features such as frequency, intensity, and rhythm.
+        </p>
+        <p class="about-text">
+            The system utilizes an optimized model that combines a Multi-Layer Feedforward Neural Network (MLFNN) and a Convolutional Neural Network (CNN). The CNN extracts complex patterns from Mel-spectrograms, while the MLFNN classifies the movie genres based on these extracted features. This approach improves classification accuracy compared to conventional methods like MFCC-based models. The model was trained on a dataset of movie background music, categorized into genres like Action, Horror, Drama, Musical, and Comedy.
+
+        </p>
+        <p class="about-text">
+            The system effectively differentiates between genres by identifying unique audio patterns, making it a robust tool for movie genre classification. This research enhances the development of smart recommendation systems, improving user experience on streaming platforms by providing genre-based suggestions based on audio analysis.
+        </p>
+      
+        <div class="researcher-grid">
+            <div class="researcher">
+              <strong>Jomari D. Encalzado</strong>
+              <p><a href="mailto:j.encalzado.525673@umindanao.edu.ph">j.encalzado.525673@umindanao.edu.ph</a></p>
+            </div>
+            <div class="researcher">
+              <strong>Kenneth James P. De Guzman</strong>
+              <p><a href="mailto:k.deguzman.525651@umindanao.edu.ph">k.deguzman.525451@umindanao.edu.ph</a></p>
+            </div>
+            <div class="researcher">
+              <strong>Kylle Adyzza I. Mendoza</strong>
+              <p><a href="mailto:k.mendoza.522854@umindanao.edu.ph">k.mendoza.522854@umindanao.edu.ph</a></p>
+            </div>
+          </div>
+      
+        <p class="about-text">
+            We are researchers from BS Computer Science students at the University of Mindanao, Matina, Davao City, under the guidance of Fe B. Yara. Our research focuses on improving movie genre classification using a MLFNN-CNN model with Mel-spectrogram analysis. By analyzing background music, we aimed to enhance classification accuracy beyond traditional methods like MFCCs. Our model achieved higher accuracy and better generalization, contributing to smarter AI-driven movie recommendation systems.
+        </p>
+      </section>
+</body>
+</html>

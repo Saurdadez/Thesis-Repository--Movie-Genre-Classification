@@ -1,0 +1,12 @@
+import json
+
+label_dict = {
+    "Action": 0,
+    "Comedy": 1,
+    "Drama": 2,
+    "Horror": 3,
+    "Musical": 4,
+    "Noise": 5
+}
+with open("label_dict.json", "w") as f:
+    json.dump(label_dict, f, indent=4)

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music Genre Classifier</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="logo-title">
+        <img
+          src="{{ url_for('static', filename='LOGO.png') }}"
+          alt="Logo"
+          class="logo"
+        />
+        <h1>Music Genre Classifier</h1>
+      </div>
+      <nav>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('about') }}">About Us</a>
+        <a href="{{ url_for('howtouse') }}">How to Use</a>
+      </nav>
+    </header>
+    <div class="container">
+      <h2>Upload an audio file to classify its genre</h2>
+      <p class="textleft">Upload your file here</p>
+
+      <div class="upload-area" id="upload-area">
+        <input
+          id="file-input"
+          class="file-input"
+          type="file"
+          accept="audio/*"
+          onchange="handleFileUpload()"
+        />
+        <p id="file-name">No file chosen</p>
+        <button
+          id="browse-button"
+          class="button browse"
+          onclick="document.getElementById('file-input').click()"
+        >
+          Browse files
+        </button>
+      </div>
+
+      <!-- Audio Player (Initially Hidden) -->
+      <div id="audio-player-container" style="display: none; margin-top: 10px">
+        <audio id="audio-player" controls></audio>
+      </div>
+
+      <div class="buttons" id="buttons">
+        <button
+          class="button remove"
+          onclick="removeFile()"
+          style="display: none"
+        >
+          Remove
+        </button>
+        <button
+          class="button classify"
+          style="display: none"
+          onclick="classifyFile()"
+        >
+          Classify
+        </button>
+      </div>
+      <div id="result-container" class="result-container"></div>
+    </div>
+
+    <script>
+      function handleFileUpload() {
+        const fileInput = document.getElementById("file-input");
+        const fileNameDisplay = document.getElementById("file-name");
+        const browseButton = document.getElementById("browse-button");
+        const removeButton = document.querySelector(".button.remove");
+        const classifyButton = document.querySelector(".button.classify");
+        const audioPlayerContainer = document.getElementById(
+          "audio-player-container"
+        );
+        const audioPlayer = document.getElementById("audio-player");
+
+        if (fileInput.files.length) {
+          const file = fileInput.files[0];
+          fileNameDisplay.textContent = file.name;
+          browseButton.style.display = "none";
+          removeButton.style.display = "inline-block";
+          classifyButton.style.display = "inline-block";
+
+          // Create a temporary URL for the audio file
+          const objectURL = URL.createObjectURL(file);
+          audioPlayer.src = objectURL;
+          audioPlayerContainer.style.display = "block"; // Show audio player
+        } else {
+          resetUI();
+        }
+      }
+
+      function removeFile() {
+        const fileInput = document.getElementById("file-input");
+        fileInput.value = "";
+        resetUI();
+      }
+
+      function resetUI() {
+        document.getElementById("file-name").textContent = "No file chosen";
+        document.getElementById("browse-button").style.display = "inline-block";
+        document.querySelector(".button.remove").style.display = "none";
+        document.querySelector(".button.classify").style.display = "none";
+
+        // Hide and clear audio player
+        const audioPlayerContainer = document.getElementById(
+          "audio-player-container"
+        );
+        const audioPlayer = document.getElementById("audio-player");
+        audioPlayer.src = "";
+        audioPlayerContainer.style.display = "none";
+
+        const resultContainer = document.getElementById("result-container");
+        if (resultContainer) {
+          resultContainer.innerHTML = "";
+          resultContainer.style.display = "none";
+        }
+      }
+
+      async function classifyFile() {
+        const fileInput = document.getElementById("file-input");
+        const file = fileInput.files[0];
+        if (!file) {
+          alert("Please select a file first");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+          const response = await fetch("http://127.0.0.1:5000/predict", {
+            method: "POST",
+            body: formData,
+          });
+
+          const text = await response.text(); // Get raw response text
+          console.log("Raw API Response:", text); // Debugging
+
+          const data = JSON.parse(text); // Parse JSON
+          console.log("Parsed API Response:", data); // Debugging
+
+          showComparison(data["Proposed Model"], data["Baseline Model"]);
+        } catch (error) {
+          console.error("Error during classification:", error);
+          alert("Classification failed. Check console for details.");
+        }
+      }
+
+      function showComparison(proposed, baseline) {
+        console.log("Proposed Model Prediction:", proposed); // Debugging
+        console.log("Baseline Model Prediction:", baseline); // Debugging
+
+        const resultContainer = document.getElementById("result-container");
+        resultContainer.innerHTML = `
+        <h3>Classification Results</h3>
+        <div class="result-columns">
+            <div class="result-column">
+                <h4>Proposed Model</h4>
+                <p><strong>Genre:</strong> ${proposed["Predicted Genre"]}</p>
+                <p><strong>Time:</strong> ${proposed[
+                  "Prediction Time (seconds)"
+                ].toFixed(2)} sec</p>
+                ${formatPercentages(proposed["Predicted Percentages"])}
+            </div>
+            <div class="result-column">
+                <h4>Baseline Model</h4>
+                <p><strong>Genre:</strong> ${baseline["Predicted Genre"]}</p>
+                <p><strong>Time:</strong> ${baseline[
+                  "Prediction Time (seconds)"
+                ].toFixed(2)} sec</p>
+                ${formatPercentages(baseline["Predicted Percentages"])}
+            </div>
+        </div>
+    `;
+        resultContainer.style.display = "block";
+      }
+
+      function formatPercentages(percentages) {
+        const sortedPercentages = Object.entries(percentages).sort(
+          (a, b) => b[1] - a[1]
+        ); // Sort in descending order
+        const highestProbability = sortedPercentages[0][1]; // Get the highest probability
+
+        return (
+          `<ul>` +
+          sortedPercentages
+            .map(([genre, prob]) => {
+              const colorStyle =
+                prob === highestProbability
+                  ? 'style="color: green; font-weight: bold;"'
+                  : "";
+              return `<li ${colorStyle}><strong>${genre}:</strong> ${prob.toFixed(
+                2
+              )}%</li>`;
+            })
+            .join("") +
+          `</ul>`
+        );
+      }
+    </script>
+  </body>
+</html>
